@@ -11,6 +11,20 @@ const formatSelect = document.getElementById("format-select");
 
 // Restore saved format or default
 let currentFormat = localStorage.getItem('timer-format') || 'd:h:m:s';
+let currentCountdownFont = localStorage.getItem('countdown-font') || "'Orbitron', sans-serif";
+let currentPomodoroFont = localStorage.getItem('pomodoro-font') || "'Inter', sans-serif";
+
+function applyCountdownFont() {
+    document.querySelectorAll('.timer-number').forEach(el => {
+        el.style.fontFamily = currentCountdownFont;
+    });
+}
+
+function applyPomodoroFont() {
+    const pTimer = document.getElementById('pomodoro-time');
+    if (pTimer) pTimer.style.fontFamily = currentPomodoroFont;
+}
+
 if (formatSelect) {
     formatSelect.value = currentFormat;
     formatSelect.addEventListener('change', (e) => {
@@ -53,6 +67,9 @@ function renderGrid() {
         }
         timerGrid.style.gridTemplateColumns = gridTemplate.trim();
     }
+
+    // Ensure font is applied to rebuilt elements
+    applyCountdownFont();
 }
 
 // Initial render
@@ -150,3 +167,238 @@ const fp = flatpickr(datePickerInput, {
 datePickerBtn.addEventListener('click', () => {
     fp.open();
 });
+
+// Mode Toggle Logic (Top Nav)
+const navCountdownBtn = document.getElementById('nav-countdown-btn');
+const navPomodoroBtn = document.getElementById('nav-pomodoro-btn');
+const countdownCard = document.getElementById('countdown-container');
+const pomodoroContainer = document.getElementById('pomodoro-container');
+
+let currentAppMode = localStorage.getItem('app-mode') || 'countdown';
+
+function updateModeUI() {
+    if (currentAppMode === 'countdown') {
+        if (navCountdownBtn) navCountdownBtn.classList.add('active');
+        if (navPomodoroBtn) navPomodoroBtn.classList.remove('active');
+        if (countdownCard) countdownCard.style.display = 'block';
+        if (pomodoroContainer) pomodoroContainer.style.display = 'none';
+
+        // Hide pomodoro-specific settings button on main screen, as it's now global
+        const oldPSettingsBtn = document.getElementById('pomodoro-settings-btn');
+        if (oldPSettingsBtn) oldPSettingsBtn.style.display = 'none';
+    } else {
+        if (navCountdownBtn) navCountdownBtn.classList.remove('active');
+        if (navPomodoroBtn) navPomodoroBtn.classList.add('active');
+        if (countdownCard) countdownCard.style.display = 'none';
+        if (pomodoroContainer) pomodoroContainer.style.display = 'flex';
+
+        // Hide pomodoro-specific settings button on main screen, as it's now global
+        const oldPSettingsBtn = document.getElementById('pomodoro-settings-btn');
+        if (oldPSettingsBtn) oldPSettingsBtn.style.display = 'none';
+    }
+}
+
+if (navCountdownBtn) {
+    navCountdownBtn.addEventListener('click', () => {
+        currentAppMode = 'countdown';
+        localStorage.setItem('app-mode', currentAppMode);
+        updateModeUI();
+    });
+}
+
+if (navPomodoroBtn) {
+    navPomodoroBtn.addEventListener('click', () => {
+        currentAppMode = 'pomodoro';
+        localStorage.setItem('app-mode', currentAppMode);
+        updateModeUI();
+    });
+}
+updateModeUI();
+
+// --- Pomodoro Logic ---
+const pomodoroTimeEl = document.getElementById('pomodoro-time');
+const pStartBtn = document.getElementById('pomodoro-start-btn');
+const pResetBtn = document.getElementById('pomodoro-reset-btn');
+const pSettingsBtn = document.getElementById('pomodoro-settings-btn');
+const pTabs = document.querySelectorAll('.pomodoro-tab');
+
+// Settings Elements
+const pSettingsModal = document.getElementById('pomodoro-settings-modal');
+const pCloseSettingsBtn = document.getElementById('close-settings-btn');
+const pSaveSettingsBtn = document.getElementById('save-settings-btn');
+const inputPomodoro = document.getElementById('setting-pomodoro');
+const inputShort = document.getElementById('setting-short');
+const inputLong = document.getElementById('setting-long');
+const inputAuto = document.getElementById('setting-auto-sequence');
+const inputCountdownFont = document.getElementById('countdown-font-select');
+const inputPomodoroFont = document.getElementById('pomodoro-font-select');
+
+// Live update font selections
+if (inputCountdownFont) {
+    inputCountdownFont.addEventListener('change', (e) => {
+        currentCountdownFont = e.target.value;
+        localStorage.setItem('countdown-font', currentCountdownFont);
+        applyCountdownFont();
+    });
+}
+
+if (inputPomodoroFont) {
+    inputPomodoroFont.addEventListener('change', (e) => {
+        currentPomodoroFont = e.target.value;
+        localStorage.setItem('pomodoro-font', currentPomodoroFont);
+        applyPomodoroFont();
+    });
+}
+
+// Pomodoro State
+let pSettings = {
+    pomodoro: parseInt(localStorage.getItem('pomo-pomodoro')) || 25,
+    shortBreak: parseInt(localStorage.getItem('pomo-short')) || 5,
+    longBreak: parseInt(localStorage.getItem('pomo-long')) || 10,
+    autoSequence: localStorage.getItem('pomo-auto') !== 'false' // default true
+};
+
+let pomoMode = 'pomodoro'; // 'pomodoro', 'shortBreak', 'longBreak'
+let pomoTimeLeft = pSettings.pomodoro * 60;
+let pomoInterval = null;
+let isPomoRunning = false;
+let completedPomodoros = 0;
+
+function formatPomoTime(seconds) {
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return `${m < 10 ? '0' : ''}${m}:${s < 10 ? '0' : ''}${s}`;
+}
+
+function updatePomoDisplay() {
+    if (pomodoroTimeEl) pomodoroTimeEl.innerText = formatPomoTime(pomoTimeLeft);
+}
+
+function setPomoMode(mode) {
+    if (isPomoRunning) togglePomoTimer(); // pause if running
+
+    pomoMode = mode;
+    pomoTimeLeft = pSettings[mode] * 60;
+    updatePomoDisplay();
+
+    // Update active tab UI
+    pTabs.forEach(tab => {
+        if (tab.dataset.mode === mode) tab.classList.add('active');
+        else tab.classList.remove('active');
+    });
+}
+
+function handlePomoComplete() {
+    togglePomoTimer(); // stop it
+
+    if (pSettings.autoSequence) {
+        if (pomoMode === 'pomodoro') {
+            completedPomodoros++;
+            if (completedPomodoros % 4 === 0) {
+                setPomoMode('longBreak');
+            } else {
+                setPomoMode('shortBreak');
+            }
+        } else {
+            // After any break, go back to pomodoro
+            setPomoMode('pomodoro');
+        }
+        // Auto-start next sequence
+        togglePomoTimer();
+    } else {
+        // Just reset the current mode's time
+        pomoTimeLeft = pSettings[pomoMode] * 60;
+        updatePomoDisplay();
+    }
+}
+
+function togglePomoTimer() {
+    if (isPomoRunning) {
+        clearInterval(pomoInterval);
+        pStartBtn.innerText = 'start';
+    } else {
+        pomoInterval = setInterval(() => {
+            pomoTimeLeft--;
+            updatePomoDisplay();
+
+            if (pomoTimeLeft <= 0) {
+                handlePomoComplete();
+            }
+        }, 1000);
+        pStartBtn.innerText = 'pause';
+    }
+    isPomoRunning = !isPomoRunning;
+}
+
+// Event Listeners for UI
+pStartBtn.addEventListener('click', togglePomoTimer);
+pResetBtn.addEventListener('click', () => {
+    if (isPomoRunning) togglePomoTimer();
+    pomoTimeLeft = pSettings[pomoMode] * 60;
+    updatePomoDisplay();
+});
+
+pTabs.forEach(tab => {
+    tab.addEventListener('click', (e) => {
+        setPomoMode(e.target.dataset.mode);
+    });
+});
+
+// Settings Modal interactions
+const mainSettingsBtn = document.getElementById('main-settings-btn');
+// Ensure clicking the main gear opens the modal
+if (mainSettingsBtn) {
+    mainSettingsBtn.addEventListener('click', () => {
+        inputPomodoro.value = pSettings.pomodoro;
+        inputShort.value = pSettings.shortBreak;
+        inputLong.value = pSettings.longBreak;
+        inputAuto.checked = pSettings.autoSequence;
+
+        if (inputCountdownFont) inputCountdownFont.value = currentCountdownFont;
+        if (inputPomodoroFont) inputPomodoroFont.value = currentPomodoroFont;
+
+        pSettingsModal.style.display = 'flex';
+    });
+}
+
+// In case old pomodoro gear button is still present, bind it too
+if (pSettingsBtn) {
+    pSettingsBtn.addEventListener('click', () => {
+        if (mainSettingsBtn) mainSettingsBtn.click();
+    });
+}
+
+pCloseSettingsBtn.addEventListener('click', () => {
+    pSettingsModal.style.display = 'none';
+});
+
+pSaveSettingsBtn.addEventListener('click', () => {
+    pSettings.pomodoro = parseInt(inputPomodoro.value) || 25;
+    pSettings.shortBreak = parseInt(inputShort.value) || 5;
+    pSettings.longBreak = parseInt(inputLong.value) || 10;
+    pSettings.autoSequence = inputAuto.checked;
+
+    if (inputCountdownFont) currentCountdownFont = inputCountdownFont.value;
+    if (inputPomodoroFont) currentPomodoroFont = inputPomodoroFont.value;
+
+    localStorage.setItem('pomo-pomodoro', pSettings.pomodoro);
+    localStorage.setItem('pomo-short', pSettings.shortBreak);
+    localStorage.setItem('pomo-long', pSettings.longBreak);
+    localStorage.setItem('pomo-auto', pSettings.autoSequence);
+    localStorage.setItem('countdown-font', currentCountdownFont);
+    localStorage.setItem('pomodoro-font', currentPomodoroFont);
+
+    applyCountdownFont();
+    applyPomodoroFont();
+
+    // Reset timer to apply new settings if we are in that mode
+    pomoTimeLeft = pSettings[pomoMode] * 60;
+    if (isPomoRunning) togglePomoTimer();
+    updatePomoDisplay();
+
+    pSettingsModal.style.display = 'none';
+});
+
+// Init
+updatePomoDisplay();
+applyPomodoroFont();

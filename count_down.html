@@ -4,45 +4,164 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Exams Countdown</title>
+    <title>Focus Timer</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Orbitron:wght@400;700;900&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Orbitron:wght@400;700;900&family=Roboto+Mono:wght@400;700&family=Space+Mono:wght@400;700&family=Share+Tech+Mono&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <link rel="stylesheet" type="text/css" href="https://npmcdn.com/flatpickr/dist/themes/dark.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
+    <!-- Top Navigation -->
+    <div class="top-nav">
+        <div class="mode-switch">
+            <button id="nav-countdown-btn" class="nav-btn active">Countdown</button>
+            <button id="nav-pomodoro-btn" class="nav-btn">Pomodoro</button>
+        </div>
+        <button id="main-settings-btn" class="nav-icon-btn"><i class="fa-solid fa-gear"></i></button>
+    </div>
+
     <div class="container">
-        <div class="countdown-card">
+        <div class="countdown-card" id="countdown-container">
 
             <div class="timer-grid" id="timer-grid">
                 <!-- Dynamically populated by JS -->
             </div>
 
         </div>
+
+        <!-- Pomodoro UI -->
+        <div id="pomodoro-container" style="display: none;">
+            <div class="pomodoro-tabs">
+                <button class="pomodoro-tab active" data-mode="pomodoro">pomodoro</button>
+                <button class="pomodoro-tab" data-mode="shortBreak">short break</button>
+                <button class="pomodoro-tab" data-mode="longBreak">long break</button>
+            </div>
+
+            <div class="pomodoro-timer-display" id="pomodoro-time">25:00</div>
+
+            <div class="pomodoro-controls">
+                <button id="pomodoro-start-btn" class="pomodoro-action-btn">start</button>
+                <button id="pomodoro-reset-btn" class="pomodoro-icon-btn"><i
+                        class="fa-solid fa-arrow-rotate-right"></i></button>
+                <button id="pomodoro-settings-btn" class="pomodoro-icon-btn"><i class="fa-solid fa-gear"></i></button>
+            </div>
+        </div>
     </div>
 
-    <div class="controls-container">
-        <select id="format-select" class="control-btn"
-            style="background: rgba(15, 15, 20, 0.7); backdrop-filter: blur(20px); cursor: pointer; border: 1px solid rgba(255, 255, 255, 0.2); color: white; border-radius: 2rem; padding: 0.8rem 1.5rem; text-align: center; font-family: 'Inter', sans-serif; text-transform: uppercase; font-size: 0.9rem; appearance: none; -webkit-appearance: none;">
-            <option value="d:h:m:s">Days : Hrs : Min : Sec</option>
-            <option value="h:m:s">Hrs : Min : Sec</option>
-        </select>
+    <!-- Pomodoro Settings Modal -->
+    <div id="pomodoro-settings-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Settings</h2>
+                <button id="close-settings-btn" class="close-btn"><i class="fa-solid fa-xmark"></i></button>
+            </div>
 
-        <input type="text" id="date-picker-input"
-            style="width: 0; height: 0; opacity: 0; position: absolute; pointer-events: none;">
-        <button id="date-picker-btn" class="control-btn">Set Target Time</button>
+            <div class="modal-body-scroll">
 
-        <input type="file" id="bg-upload" accept="image/*" hidden>
-        <label for="bg-upload" class="control-btn">Change Wallpaper</label>
+                <!-- Countdown Settings -->
+                <div class="settings-section">
+                    <h3 class="section-title">Countdown Settings</h3>
+                    <div class="setting-row">
+                        <label>Timer Format</label>
+                        <select id="format-select" class="style-select">
+                            <option value="d:h:m:s">Days : Hrs : Min : Sec</option>
+                            <option value="h:m:s">Hrs : Min : Sec</option>
+                        </select>
+                    </div>
+                    <div class="setting-row">
+                        <label>Target Date</label>
+                        <div class="input-with-btn">
+                            <input type="text" id="date-picker-input" class="hidden-picker"
+                                style="width: 0; height: 0; opacity: 0; position: absolute; pointer-events: none;">
+                            <button id="date-picker-btn" class="action-btn">Select Date & Time</button>
+                        </div>
+                    </div>
+                    <div class="setting-row">
+                        <label>Number Font</label>
+                        <select id="countdown-font-select" class="style-select" style="width: 150px;">
+                            <option value="'Orbitron', sans-serif">Orbitron</option>
+                            <option value="'Inter', sans-serif">Inter</option>
+                            <option value="'Roboto Mono', monospace">Roboto Mono</option>
+                            <option value="'Space Mono', monospace">Space Mono</option>
+                            <option value="'Share Tech Mono', monospace">Share Tech Mono</option>
+                        </select>
+                    </div>
+                </div>
+
+                <hr class="section-divider">
+
+                <!-- Appearance Settings -->
+                <div class="settings-section">
+                    <h3 class="section-title">Appearance</h3>
+                    <div class="setting-row">
+                        <label>Wallpaper</label>
+                        <div class="input-with-btn">
+                            <input type="file" id="bg-upload" accept="image/*" hidden>
+                            <label for="bg-upload" class="action-btn">Choose Image</label>
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="section-divider">
+
+                <!-- Pomodoro Settings -->
+                <div class="settings-section">
+                    <h3 class="section-title">Pomodoro Settings</h3>
+                    <div class="setting-row" style="margin-bottom: 1.5rem;">
+                        <label>Number Font</label>
+                        <select id="pomodoro-font-select" class="style-select" style="width: 150px;">
+                            <option value="'Orbitron', sans-serif">Orbitron</option>
+                            <option value="'Inter', sans-serif">Inter</option>
+                            <option value="'Roboto Mono', monospace">Roboto Mono</option>
+                            <option value="'Space Mono', monospace">Space Mono</option>
+                            <option value="'Share Tech Mono', monospace">Share Tech Mono</option>
+                        </select>
+                    </div>
+                    <div class="settings-grid">
+                        <div class="setting-group">
+                            <label>Pomodoro</label>
+                            <input type="number" id="setting-pomodoro" value="25" min="1">
+                            <span class="unit">minutes</span>
+                        </div>
+                        <div class="setting-group">
+                            <label>Short Break</label>
+                            <input type="number" id="setting-short" value="5" min="1">
+                            <span class="unit">minutes</span>
+                        </div>
+                        <div class="setting-group">
+                            <label>Long Break</label>
+                            <input type="number" id="setting-long" value="10" min="1">
+                            <span class="unit">minutes</span>
+                        </div>
+                    </div>
+
+                    <div class="setting-toggle-row">
+                        <label class="switch">
+                            <input type="checkbox" id="setting-auto-sequence" checked>
+                            <span class="slider round"></span>
+                        </label>
+                        <div class="toggle-text">
+                            <strong>Use the Pomodoro sequence:</strong>
+                            <span>Pomodoro → short break, repeat 4x, then one long break</span>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            <button id="save-settings-btn" class="save-btn">Save Changes</button>
+        </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-    <script src="script.js"></script>
+    <script src="countdown.js"></script>
+    <script src="pomodoro.js"></script>
+    <script src="main.js"></script>
 </body>
 
 </html>
