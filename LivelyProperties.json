@@ -1,0 +1,40 @@
+{
+  "targetDateText": {
+    "title": "Target Date (YYYY-MM-DD HH:MM)",
+    "type": "string",
+    "value": "2026-02-27 14:00"
+  },
+  "timerFormat": {
+    "title": "Timer Format",
+    "type": "dropdown",
+    "value": 0,
+    "items": [
+      "Days : Hrs : Min : Sec",
+      "Hrs : Min : Sec"
+    ]
+  },
+  "countdownFont": {
+    "title": "Countdown Font",
+    "type": "dropdown",
+    "value": 0,
+    "items": [
+      "Orbitron",
+      "Inter",
+      "Roboto Mono",
+      "Space Mono",
+      "Share Tech Mono"
+    ]
+  },
+  "pomodoroFont": {
+    "title": "Pomodoro Font",
+    "type": "dropdown",
+    "value": 1,
+    "items": [
+      "Orbitron",
+      "Inter",
+      "Roboto Mono",
+      "Space Mono",
+      "Share Tech Mono"
+    ]
+  }
+}

@@ -62,17 +62,27 @@
                 <button id="close-settings-btn" class="close-btn"><i class="fa-solid fa-xmark"></i></button>
             </div>
 
-            <div class="modal-body-scroll">
+            <!-- Settings Tabs Header -->
+            <div class="settings-tabs-nav">
+                <button class="settings-tab-btn active" data-target="settings-countdown">Countdown</button>
+                <button class="settings-tab-btn" data-target="settings-appearance">Appearance</button>
+                <button class="settings-tab-btn" data-target="settings-pomodoro">Pomodoro</button>
+            </div>
+
+            <div class="modal-body-tabs">
 
                 <!-- Countdown Settings -->
-                <div class="settings-section">
-                    <h3 class="section-title">Countdown Settings</h3>
+                <div id="settings-countdown" class="settings-tab-content active">
                     <div class="setting-row">
                         <label>Timer Format</label>
-                        <select id="format-select" class="style-select">
-                            <option value="d:h:m:s">Days : Hrs : Min : Sec</option>
-                            <option value="h:m:s">Hrs : Min : Sec</option>
-                        </select>
+                        <div class="custom-select-wrapper">
+                            <div class="custom-select" id="format-select-trigger" data-value="d:h:m:s">Days : Hrs : Min
+                                : Sec</div>
+                            <div class="custom-options" id="format-select-options">
+                                <div class="custom-option" data-value="d:h:m:s">Days : Hrs : Min : Sec</div>
+                                <div class="custom-option" data-value="h:m:s">Hrs : Min : Sec</div>
+                            </div>
+                        </div>
                     </div>
                     <div class="setting-row">
                         <label>Target Date</label>
@@ -84,44 +94,50 @@
                     </div>
                     <div class="setting-row">
                         <label>Number Font</label>
-                        <select id="countdown-font-select" class="style-select" style="width: 150px;">
-                            <option value="'Orbitron', sans-serif">Orbitron</option>
-                            <option value="'Inter', sans-serif">Inter</option>
-                            <option value="'Roboto Mono', monospace">Roboto Mono</option>
-                            <option value="'Space Mono', monospace">Space Mono</option>
-                            <option value="'Share Tech Mono', monospace">Share Tech Mono</option>
-                        </select>
+                        <div class="custom-select-wrapper" style="width: 150px;">
+                            <div class="custom-select" id="countdown-font-select-trigger"
+                                data-value="'Orbitron', sans-serif">Orbitron</div>
+                            <div class="custom-options" id="countdown-font-select-options">
+                                <div class="custom-option" data-value="'Orbitron', sans-serif">Orbitron</div>
+                                <div class="custom-option" data-value="'Inter', sans-serif">Inter</div>
+                                <div class="custom-option" data-value="'Roboto Mono', monospace">Roboto Mono</div>
+                                <div class="custom-option" data-value="'Space Mono', monospace">Space Mono</div>
+                                <div class="custom-option" data-value="'Share Tech Mono', monospace">Share Tech Mono
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <hr class="section-divider">
-
                 <!-- Appearance Settings -->
-                <div class="settings-section">
-                    <h3 class="section-title">Appearance</h3>
+                <div id="settings-appearance" class="settings-tab-content">
                     <div class="setting-row">
-                        <label>Wallpaper</label>
+                        <label>Wallpaper (Local Only)</label>
                         <div class="input-with-btn">
                             <input type="file" id="bg-upload" accept="image/*" hidden>
                             <label for="bg-upload" class="action-btn">Choose Image</label>
                         </div>
                     </div>
+                    <p style="font-size: 0.8rem; color: #aaa; margin-top: 10px;">Note: In Lively Wallpaper, use the
+                        "Customize" menu to change backgrounds and settings persistently.</p>
                 </div>
 
-                <hr class="section-divider">
-
                 <!-- Pomodoro Settings -->
-                <div class="settings-section">
-                    <h3 class="section-title">Pomodoro Settings</h3>
+                <div id="settings-pomodoro" class="settings-tab-content">
                     <div class="setting-row" style="margin-bottom: 1.5rem;">
                         <label>Number Font</label>
-                        <select id="pomodoro-font-select" class="style-select" style="width: 150px;">
-                            <option value="'Orbitron', sans-serif">Orbitron</option>
-                            <option value="'Inter', sans-serif">Inter</option>
-                            <option value="'Roboto Mono', monospace">Roboto Mono</option>
-                            <option value="'Space Mono', monospace">Space Mono</option>
-                            <option value="'Share Tech Mono', monospace">Share Tech Mono</option>
-                        </select>
+                        <div class="custom-select-wrapper" style="width: 150px;">
+                            <div class="custom-select" id="pomodoro-font-select-trigger"
+                                data-value="'Inter', sans-serif">Inter</div>
+                            <div class="custom-options" id="pomodoro-font-select-options">
+                                <div class="custom-option" data-value="'Orbitron', sans-serif">Orbitron</div>
+                                <div class="custom-option" data-value="'Inter', sans-serif">Inter</div>
+                                <div class="custom-option" data-value="'Roboto Mono', monospace">Roboto Mono</div>
+                                <div class="custom-option" data-value="'Space Mono', monospace">Space Mono</div>
+                                <div class="custom-option" data-value="'Share Tech Mono', monospace">Share Tech Mono
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     <div class="settings-grid">
                         <div class="setting-group">
@@ -151,8 +167,8 @@
                             <span>Pomodoro → short break, repeat 4x, then one long break</span>
                         </div>
                     </div>
-
                 </div>
+
             </div>
             <button id="save-settings-btn" class="save-btn">Save Changes</button>
         </div>
