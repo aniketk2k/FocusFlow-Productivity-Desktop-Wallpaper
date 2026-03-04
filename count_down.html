@@ -27,6 +27,39 @@
     </div>
 
     <div class="container">
+        <!-- Task Panel -->
+        <div class="task-panel" id="task-panel">
+            <div class="task-header">
+                <h3>DAILY TASKS</h3>
+                <div class="task-header-actions">
+                    <button id="add-task-btn" class="task-icon-btn"><i class="fa-solid fa-plus"></i></button>
+                    <button id="edit-task-btn" class="task-icon-btn"><i class="fa-solid fa-pen-to-square"></i></button>
+                </div>
+            </div>
+
+            <div class="task-input-container">
+                <button class="add-task-inline-btn"><i class="fa-solid fa-plus"></i></button>
+                <input type="text" id="new-task-input" placeholder="Add Task">
+            </div>
+
+            <ul class="task-list" id="task-list">
+                <!-- Dynamically populated by tasks.js -->
+            </ul>
+
+            <div id="completed-section" style="display: none;">
+                <div class="completed-header">Completed Tasks</div>
+                <ul class="task-list" id="completed-task-list">
+                    <!-- Dynamically populated by tasks.js -->
+                </ul>
+            </div>
+
+            <div class="task-footer">
+                <span id="task-completion-stats">Completed: <span id="completed-count">0</span> / <span
+                        id="total-count">0</span></span>
+                <span id="task-streak">Streak: <span id="streak-count">0</span> days</span>
+            </div>
+        </div>
+
         <div class="countdown-card" id="countdown-container">
 
             <div class="timer-grid" id="timer-grid">
@@ -175,6 +208,7 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="tasks.js"></script>
     <script src="countdown.js"></script>
     <script src="pomodoro.js"></script>
     <script src="main.js"></script>
