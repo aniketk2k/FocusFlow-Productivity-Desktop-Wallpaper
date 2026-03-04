@@ -54,9 +54,12 @@
             </div>
 
             <div class="task-footer">
-                <span id="task-completion-stats">Completed: <span id="completed-count">0</span> / <span
-                        id="total-count">0</span></span>
-                <span id="task-streak">Streak: <span id="streak-count">0</span> days</span>
+                <div class="progress-container">
+                    <div class="progress-bar-bg">
+                        <div class="progress-bar-fill" id="task-progress-fill"></div>
+                    </div>
+                    <span id="task-progress-text">0% Completed</span>
+                </div>
             </div>
         </div>
 

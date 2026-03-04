@@ -59,6 +59,13 @@ function renderGrid() {
             if (i < parts.length - 1) gridTemplate += 'auto ';
         }
         timerGrid.style.gridTemplateColumns = gridTemplate.trim();
+
+        // Add a specialized class if it's the 3-part layout
+        if (parts.length === 3) {
+            timerGrid.classList.add('three-part');
+        } else {
+            timerGrid.classList.remove('three-part');
+        }
     }
 
     // Ensure font is applied to rebuilt elements

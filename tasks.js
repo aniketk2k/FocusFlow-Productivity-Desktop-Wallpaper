@@ -2,8 +2,6 @@
 
 // State
 let tasks = JSON.parse(localStorage.getItem('daily-tasks')) || [];
-let currentStreak = parseInt(localStorage.getItem('task-streak')) || 0;
-let lastCompletionDate = localStorage.getItem('last-completion-date');
 let isEditMode = false;
 
 // DOM Elements
@@ -13,7 +11,6 @@ const completedSection = document.getElementById('completed-section');
 const newTaskInput = document.getElementById('new-task-input');
 const completedCountEl = document.getElementById('completed-count');
 const totalCountEl = document.getElementById('total-count');
-const streakCountEl = document.getElementById('streak-count');
 const addTaskBtnInline = document.querySelector('.add-task-inline-btn');
 const addTaskBtn = document.getElementById('add-task-btn');
 const editTaskBtn = document.getElementById('edit-task-btn');
@@ -63,13 +60,21 @@ function renderTasks() {
     });
 
     if (completedSection) {
-        completedSection.style.display = completedCount > 0 ? 'block' : 'none';
+        completedSection.style.display = completedCount > 0 ? 'flex' : 'none';
     }
 
-    if (completedCountEl) completedCountEl.innerText = completedCount;
-    if (totalCountEl) totalCountEl.innerText = tasks.length;
+    const totalCount = tasks.length;
+    let percentage = 0;
 
-    checkStreak(completedCount, tasks.length);
+    if (totalCount > 0) {
+        percentage = Math.round((completedCount / totalCount) * 100);
+    }
+
+    const progressFill = document.getElementById('task-progress-fill');
+    const progressText = document.getElementById('task-progress-text');
+
+    if (progressFill) progressFill.style.width = `${percentage}%`;
+    if (progressText) progressText.innerText = `${percentage}% Completed`;
 }
 
 function addTask(text) {
@@ -149,35 +154,6 @@ window.updateTaskText = function (id, newText) {
     }
 }
 
-function checkStreak(completed, total) {
-    const today = new Date().toDateString();
-
-    if (total > 0 && completed === total) {
-        if (lastCompletionDate !== today) {
-            const yesterday = new Date();
-            yesterday.setDate(yesterday.getDate() - 1);
-
-            if (lastCompletionDate === yesterday.toDateString()) {
-                currentStreak++;
-            } else if (lastCompletionDate !== today) {
-                currentStreak = 1;
-            }
-
-            lastCompletionDate = today;
-            localStorage.setItem('task-streak', currentStreak);
-            localStorage.setItem('last-completion-date', lastCompletionDate);
-        }
-    } else if (lastCompletionDate) {
-        const yesterday = new Date();
-        yesterday.setDate(yesterday.getDate() - 1);
-        if (lastCompletionDate !== today && lastCompletionDate !== yesterday.toDateString()) {
-            currentStreak = 0;
-            localStorage.setItem('task-streak', currentStreak);
-        }
-    }
-
-    if (streakCountEl) streakCountEl.innerText = currentStreak;
-}
 
 // Event Listeners
 if (newTaskInput) {
